@@ -61,7 +61,14 @@ if __name__ == "__main__":
                 elif type(res) == str:
                     print(res)
                 else:
-                    for a in res:
-                        print(a)
+                    if type(res[0]) == str:
+                        for a in res:
+                            print(a)
+                    else:
+                        for a in res:
+                            print("-----")
+                            for x in a.keys():
+                                print(x.upper(), "=", a[x])
+                        
             except:
                 print("Bad arguments")
