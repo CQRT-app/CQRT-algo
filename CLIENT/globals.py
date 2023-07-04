@@ -28,6 +28,9 @@ def initialize():
     global orientation
     orientation = "paysage"
 
+    global actuel
+    actuel = "home"
+
     global account_client
     account_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

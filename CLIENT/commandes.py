@@ -14,8 +14,6 @@ from utils import *
 
 # ---------- VARIABLES GLOBALES ----------
 __author__ = "reza0310"
-actuel = "home"
-
 
 # ---------- FONCTIONS DE COMMANDES ----------
 def help():
@@ -60,11 +58,11 @@ def help():
 
 
 def cwd():
-    return "/"+actuel
+    return "/"+globals.actuel
 
 
 def ls():
-    resultats = os.listdir(actuel)
+    resultats = os.listdir(globals.actuel)
     res = []
     for x in resultats:
         x, bonus = identifile_moins(x)
@@ -75,7 +73,7 @@ def ls():
 def mkdir(nom):
     if nom.count("[CONVERSATION]") == 0:
         try:
-            os.mkdir(actuel+globals.separateur+nom)
+            os.mkdir(globals.actuel+globals.separateur+nom)
             return "."
         except Exception as e:
             return str(e)
@@ -84,15 +82,14 @@ def mkdir(nom):
 
 
 def cd(chemin):
-    global actuel
-    for x in chemin.split("/"):
-        if x == ".." and actuel.count(globals.separateur) != 0:
+    for x in chemin.split(globals.separateur):
+        if x == ".." and globals.actuel.count(separateur) != 0:
             nouveau = ""
-            for x in actuel.split(globals.separateur)[:-1]:
-                nouveau += globals.separateur + x
-            actuel = nouveau[1:]
+            for x in globals.actuel.split(separateur)[:-1]:
+                nouveau += separateur + x
+            globals.actuel = nouveau[1:]
         elif x.ljust(69)+" | DOSSIER" in ls():
-            actuel += globals.separateur + x
+            globals.actuel += separateur + x
         elif x == "..":
             return "Déjà à la racine"
         else:
@@ -101,7 +98,7 @@ def cd(chemin):
 
 
 def mkr(nom):
-    f = open(actuel+globals.separateur+"[PORTECLEF]"+nom+".json", "w+")
+    f = open(globals.actuel+globals.separateur+"[PORTECLEF]"+nom+".json", "w+")
     json.dump({}, f)
     f.close()
     return "."
@@ -109,7 +106,7 @@ def mkr(nom):
 
 def rm(nom):
     nom, dir = identifile_plus(nom)
-    nom = actuel+globals.separateur+nom
+    nom = globals.actuel+globals.separateur+nom
     try:
         if dir:
             shutil.rmtree(nom)
@@ -122,7 +119,7 @@ def rm(nom):
 
 def mv(nom, destination):
     nom, dir = identifile_plus(nom)
-    nom = actuel+globals.separateur+nom
+    nom = globals.actuel+globals.separateur+nom
     try:
         shutil.move(nom, "home"+globals.separateur+destination)
         return "."
@@ -131,7 +128,7 @@ def mv(nom, destination):
 
 
 def lkr(nom):
-    f = open(actuel+globals.separateur+identifile_plus(nom)[0], "r")
+    f = open(globals.actuel+globals.separateur+identifile_plus(nom)[0], "r")
     data = json.load(f)
     f.close()
     return ["-"+x for x in data.keys()]
