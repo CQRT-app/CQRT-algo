@@ -68,7 +68,7 @@ def ls():
     res = []
     for x in resultats:
         x, bonus = identifile_moins(x)
-        res.append(x.ljust(69)+" | "+bonus)
+        res.append({"type":bonus, "nom":x, "ext":"json"})
     return res
 
 
