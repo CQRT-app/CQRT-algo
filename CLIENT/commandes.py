@@ -1,6 +1,7 @@
 # ---------- IMPORATIONS ----------
 import json
 import os
+import os.path
 import random
 from passlib.hash import phpass
 import secrets
@@ -83,13 +84,13 @@ def mkdir(nom):
 
 def cd(chemin):
     for x in chemin.split(globals.separateur):
-        if x == ".." and globals.actuel.count(separateur) != 0:
+        if x == ".." and globals.actuel != globals.racine:
             nouveau = ""
-            for x in globals.actuel.split(separateur)[:-1]:
-                nouveau += separateur + x
-            globals.actuel = nouveau[1:]
-        elif x.ljust(69)+" | DOSSIER" in ls():
-            globals.actuel += separateur + x
+            for x in globals.actuel.split(globals.separateur)[:-1]:
+                nouveau += globals.separateur + x
+            globals.actuel = nouveau[len(globals.separateur):]
+        elif os.path.isdir(x):
+            globals.actuel += globals.separateur + x
         elif x == "..":
             return "Déjà à la racine"
         else:
@@ -98,7 +99,7 @@ def cd(chemin):
 
 
 def mkr(nom):
-    f = open(globals.actuel+globals.separateur+"[PORTECLEF]"+nom+".json", "w+")
+    f = open(globals.actuel+globals.separateur+"[PORTE-CLEFS]"+nom+".json", "w+")
     json.dump({}, f)
     f.close()
     return "."

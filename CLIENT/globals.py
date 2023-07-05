@@ -31,6 +31,9 @@ def initialize():
     global actuel
     actuel = "home"
 
+    global racine
+    racine = "home"
+
     global account_client
     account_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
