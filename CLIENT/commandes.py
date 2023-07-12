@@ -2,12 +2,8 @@
 import json
 import os
 import os.path
-import random
-from passlib.hash import phpass
-import secrets
 import shutil
 
-from bytes import bytestring
 import globals
 from connexions import *
 from cypher import *
@@ -35,8 +31,12 @@ def help():
              "reset": "SUPPRIME TOUT",
              "send_message [compte] [porteclefs] [pseudo] [titre] [message]": "Envoie le message [message] chiffré au compte [pseudo] du porte-clefs [porteclefs] avec le titre [titre].",
              "pull_messages [compte]": "Récupérera tout les messages adressés à votre compte sur le serveur non-encore dans le dossier",
-             "read_message [compte] [message]": "Lira un fichier de message avec le compte [compte]",
-             "credits": "Affiche les credits"},
+             "read_message [message]": "Lira un fichier de message avec le compte [compte]",
+             "credits": "Affiche les credits",
+             "add_alias [a] [b]": "Ajoute l'alias [a] pour exécuter la commande [b]",
+             "remove_alias [a]": "Retire l'alias [a]",
+             "set_aliases": "Sauvegarde les aliases actuels pour la prochaine fois",
+             "get_aliases": "Liste les aliases actuels"},
             {"help": "h, ?",
              "cwd": "",
              "ls": "listdir, dir",
@@ -54,20 +54,46 @@ def help():
              "reset": "",
              "send_message [compte] [porteclefs] [pseudo] [titre] [message]": "",
              "pull_messages [compte]": "",
-             "read_message [compte] [message]": "",
-             "credits": ""}]
+             "read_message [message]": "",
+             "credits": "",
+             "add_alias [a] [b]": "",
+             "remove_alias [a]": "",
+             "set_aliases": "",
+             "get_aliases": ""}]
 
 
 def cwd():
     return "/"+globals.actuel
 
 
+def set_aliases():
+    f = open("aliases.json", "w")
+    json.dump(globals.aliases, f)
+    f.close()
+    return "."
+
+
+def add_alias(a, b):
+    globals.aliases[a] = b
+    return "."
+
+
+def remove_alias(a):
+    globals.aliases.pop(a)
+    return "."
+
+
+def get_aliases():
+    return [globals.aliases]
+
+
 def ls():
     resultats = os.listdir(globals.actuel)
     res = []
     for x in resultats:
-        x, bonus = identifile_moins(x)
-        res.append({"type":bonus, "nom":x, "ext":"json"})
+        nom, bonus = identifile_moins(x)
+        y = x.split(".")
+        res.append({"type":bonus, "nom":nom, "ext":"Aucune" if len(y) == 1 else y[-1], "total": globals.actuel+globals.separateur+x})
     return res
 
 
@@ -89,10 +115,10 @@ def cd(chemin):
             for x in globals.actuel.split(globals.separateur)[:-1]:
                 nouveau += globals.separateur + x
             globals.actuel = nouveau[len(globals.separateur):]
-        elif os.path.isdir(x):
-            globals.actuel += globals.separateur + x
         elif x == "..":
             return "Déjà à la racine"
+        elif os.path.isdir(globals.actuel + globals.separateur + x):
+            globals.actuel += globals.separateur + x
         else:
             return "Mauvais nom de dossier"
     return "."
@@ -132,7 +158,7 @@ def lkr(nom):
     f = open(globals.actuel+globals.separateur+identifile_plus(nom)[0], "r")
     data = json.load(f)
     f.close()
-    return ["-"+x for x in data.keys()]
+    return [x for x in data.keys()]
 
 
 def reset():
@@ -142,33 +168,16 @@ def reset():
 
 
 def credits():
-    return ["Idée de base:",
-            "рысь корп#8628",
-            "",
-            "Membres de l'équipe:",
-            "-рысь корп#8628",
-            "-viktor#7755",
-            "-TBZ_Jules785#5878",
-            "-Mazalex#7173",
-            "-reza0310#0310",
-            "",
-            "Planification technique:",
-            "-reza0310#0310",
-            "",
-            "Implémentation:",
-            "-reza0310#0310",
-            "",
-            "Design interface:",
-            "C'est juste des lignes de commande...",
-            "",
-            "Implémentation interface:",
-            "-reza0310#0310",
-            "",
-            "Bibliographie:",
-            "-https://passlib.readthedocs.io/en/stable/lib/passlib.hash.phpass.html",
-            "-https://fr.wikipedia.org/wiki/Algorithme_d'Euclide_étendu",
-            "-https://en.wikipedia.org/wiki/Primality_test",
-            "-https://docs.python.org/3/library/secrets.html#module-secrets",
-            "-https://fr.wikipedia.org/wiki/Chiffrement_RSA"]
+    # Liste pour: Généralités, techinque, interface, externe
+    return [{"Commanditaire": ["Bryan"],
+            "Membres de l'équipe": ["Bryan", "Victor", "Jules", "Alexis", "reza0310"]},
+            {"Planification technique": ["reza0310"],
+            "Implémentation technique": ["reza0310"]},
+            {"Design interface": [],
+            "Implémentation interface": [],
+            "Ressources pour l'interface": []},
+            {"Inspirations": ["Pretty Good Privacy", "Arithmetic For Information Technology (by EPITA)"],
+            "Bibliographie": ["https://passlib.readthedocs.io/en/stable/lib/passlib.hash.phpass.html", "https://fr.wikipedia.org/wiki/Algorithme_d'Euclide_étendu", "https://en.wikipedia.org/wiki/Primality_test", "https://docs.python.org/3/library/secrets.html#module-secrets", "https://fr.wikipedia.org/wiki/Chiffrement_RSA"]}
+            ]
 
 # ---------- FIN ----------

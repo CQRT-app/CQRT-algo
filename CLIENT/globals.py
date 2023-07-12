@@ -1,6 +1,37 @@
 import socket
+import time
+import json
 
 __author__ = "reza0310"
+
+
+class Client():
+
+    def __init__(self):
+        self.coeur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.ip = ""
+        self.port = 0
+
+    def connect(self, iport):
+        ip, port = iport.split(":")
+        port = int(port)
+        self.coeur.connect((ip, port))
+        self.ip = ip
+        self.port = port
+        return "."
+
+    def echanger(self, message):  # Code pour envoyer un msg
+        print("Envoi de:", message.split("\0"))
+        message = message.encode('utf-8')
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+        self.coeur.send(message_header + message)
+        message_header = self.coeur.recv(HEADER_LENGTH)
+        if not len(message_header):
+            print('Connection perdue.')
+        message_length = int(message_header.decode('utf-8').strip())
+        time.sleep(1)
+        message = self.coeur.recv(message_length).decode('utf-8')
+        return message.replace("&apos;", "'").replace('&quot;', '"')
 
 
 def initialize():
@@ -13,20 +44,10 @@ def initialize():
     global separateur
     separateur = "/"
 
-    global images
-    images = {"arriere_plan": "data"+separateur+"arriereplan.png"}
-
-    global mode
-    mode = "DEV"
-
-    global longueur_dev
-    longueur_dev = 1334
-
-    global largeur_dev
-    largeur_dev = 750
-
-    global orientation
-    orientation = "paysage"
+    global aliases
+    f = open("aliases.json", "r")
+    aliases = json.load(f)
+    f.close()
 
     global actuel
     actuel = "home"
@@ -35,16 +56,10 @@ def initialize():
     racine = "home"
 
     global account_client
-    account_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    global account_ip
-    account_ip = ""
-
-    global account_port
-    account_port = 0
+    account_client = Client()
 
     global message_client
-    message_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    message_client = Client()
 
-    global message_ip
-    message_ip = ""
+    global sync_client
+    sync_client = Client()

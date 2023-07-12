@@ -1,6 +1,11 @@
 from passlib.hash import phpass
+import random
 import secrets
+
+from bytes import bytestring
 from utils import *
+import globals
+import json
 
 # ---------- RSA ----------
 def miller_rabin_prime(n):
@@ -50,6 +55,37 @@ def bezout_euclide_etendu(rn, rn1, un=1, un1=0, vn=0, vn1=1):
     return rn1, un1, vn1
 
 
+def euclideEtendu(bNombre, aModulo):
+    """ Algorithme d'Euclide étendu, permettant de connaître:
+        PGCD
+        Coefficients de Bézout (u, v)
+        Inverse modulaire de B modulo A ---> B * B^-1 mod A = 1 
+        """
+    modulo = aModulo
+    
+    x = 0
+    y = 1
+    u = 1
+    v = 0
+    
+    while bNombre != 0:
+        q = aModulo // bNombre
+        r = aModulo % bNombre
+        
+        m = x - u * q
+        n = y - v * q
+        
+        aModulo = bNombre
+        bNombre = r
+        x = u
+        y = v
+        u = m
+        v = n
+    
+    ' retourne (pgcd, u, v, inverse modulaire) '
+    return (aModulo, x, y, x % modulo)
+
+
 def rsa_gen_keys(nom):
 
     print(f"Début de la génération des clefs {nom}")
@@ -61,7 +97,7 @@ def rsa_gen_keys(nom):
     while not(miller_rabin_prime(p)):
         p = secrets.randbits(1024)
 
-    print("p trouvé")
+    print("p trouvé:", int(p))
 
     q = secrets.randbits(1024)
 
@@ -70,29 +106,33 @@ def rsa_gen_keys(nom):
     while not(miller_rabin_prime(q)):
         q = secrets.randbits(1024)
 
-    print("q trouvé")
+    print("q trouvé:", int(q))
 
     n = bite(bytestring(p*q).signed_version())
     indic = (p-1) * (q-1)
+    print("n calculé:", int(n))
+    print("indic calculé:", indic)
+    print("diff:", indic-int(n))
+    
     e = secrets.randbits(3072)
 
     print("Recherche de e")
 
-    while not(bezout_euclide_etendu(e, indic)[0] == 1):
+    while not(euclideEtendu(e, indic)[0] == 1):
         e = secrets.randbits(3072)
 
-    print("e trouvé")
-
-    d = bite(bytestring(bezout_euclide_etendu(e, indic)[1]).signed_version())
+    print("BEE de d:", euclideEtendu(e, indic))
+    d = bite(bytestring(euclideEtendu(e, indic)[3]).signed_version())
     e = bite(bytestring(e).signed_version())
 
-    print("d calculé")
+    print("e trouvé:", int(e))
+    print("d calculé:", int(d))
     print("test des clefs")
 
     x = secrets.randbits(10)
     if pow(pow(x, int(e), int(n)), int(d), int(n)) == pow(pow(x, int(d), int(n)), int(e), int(n)) == x:
         print("test validé")
-        with open(actuel+globals.separateur+f"[CLEFS]{nom}.json", "w+") as file:
+        with open(globals.actuel+globals.separateur+f"[CLEFS]{nom}.json", "w+") as file:
             json.dump({"n": n.signed_version(), "e": e.signed_version(), "d": d.signed_version()}, file)
         return "."
     else:

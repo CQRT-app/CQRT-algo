@@ -1,3 +1,7 @@
+from bytes import bytestring
+import os
+import globals
+
 # ---------- FONCTIONS UTILES ----------
 def identifile_moins(filename):
     if filename.count("[") == 1:
@@ -13,9 +17,9 @@ def identifile_moins(filename):
 
 
 def identifile_plus(filename):
-    for x in os.listdir(actuel):
+    for x in os.listdir(globals.actuel):
         if x == filename or x == "[CONVERSATION]"+filename or x.count("]") == 1 and x.split("]")[1][:-5] == filename:
-            return x, os.path.isdir(actuel+globals.separateur+x)
+            return x, os.path.isdir(globals.actuel+globals.separateur+x)
 
 
 def bite(x):
